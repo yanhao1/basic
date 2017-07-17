@@ -116,26 +116,4 @@ class Category extends ActiveRecord
         return false;
     }
 
-    /*
-     * 删除分类
-     */
-    public function actionDel()
-    {
-        try {
-            $cateid = Yii::$app->request->get('cateid');
-            if (empty($cateid)) {
-                throw new \Exception('参数错误');
-            }
-            $data = Category::find()->where('parentid = :pid', [":pid" => $cateid])->one();
-            if ($data) {
-                throw new \Exception('该分类下有子类，不允许删除');
-            }
-            if (!Category::deleteAll('cateid = :id', [":id" => $cateid])) {
-                throw new \Exception('删除失败');
-            }
-        } catch(\Exception $e) {
-            Yii::$app->session->setFlash('info', $e->getMessage());
-        }
-        return $this->redirect(['category/list']);
-    }
 }
