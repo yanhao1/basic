@@ -56,5 +56,29 @@ class ProductController extends  CommonController
 
         return $this->render("add", ['opts' => $list, 'model' => $model]);
     }
+    /*
+     * 上传
+     */
+
+    private function upload()
+    {
+        if ($_FILES['Product']['error']['cover'] > 0) {
+            return false;
+        }
+        $qiniu = new Qiniu(Product::AK, Product::SK, Product::DOMAIN, Product::BUCKET);
+        $key = uniqid();
+        $qiniu->uploadFile($_FILES['Product']['tmp_name']['cover'], $key);
+        $cover = $qiniu->getLink($key);
+        $pics = [];
+        foreach ($_FILES['Product']['tmp_name']['pics'] as $k => $file) {
+            if ($_FILES['Product']['error']['pics'][$k] > 0) {
+                continue;
+            }
+            $key = uniqid();
+            $qiniu->uploadFile($file, $key);
+            $pics[$key] = $qiniu->getLink($key);
+        }
+        return ['cover' => $cover, 'pics' => json_encode($pics)];
+    }
 
 }
